@@ -13,13 +13,13 @@ exports.createQuestion = async (req, res) => {
     const imageFile = req.file;
 
     if (!text || !options || !type || !category) {
-        return res.status(400).json({ error: "Please provide all required fields." });
+        return res.status(400).json({ status: "error", message: "Please provide all required fields." });
     }
 
     try {
         const correctOption = options.find(option => option.isCorrect === true);
         if (!correctOption) {
-            return res.status(400).json({ error: 'Correct answer must be one of the options.' });
+            return res.status(400).json({ status: "error", message: 'Correct answer must be one of the options.' });
         }
 
         let imageUrl = null;
@@ -41,23 +41,23 @@ exports.createQuestion = async (req, res) => {
         });
 
         await question.save();
-        res.status(201).json({ message: "Question created successfully", question });
+        return res.status(201).json({ status: "sucess", message: "Question created successfully", question });
     } catch (error) {
         if (error.name === "ValidationError") {
             const errorMessages = Object.values(error.errors).map(err => err.message);
-            return res.status(400).json({ error: errorMessages.join(", ") });
+            return res.status(400).json({ status: "error" ,message: errorMessages.join(", ") });
         }
         console.error("Error creating question:", error);
-        res.status(500).json({ error: "Failed to create question" });
+        return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
 };
 
 exports.getAllQuestions = async (req, res) => {
     try {
         const questions = await Question.find();
-        res.status(200).json(questions);
+        return res.status(200).json({status: "success", questions});
     } catch (error) {
-        res.status(500).json({ error: "Failed to retrieve questions" });
+        return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
 };
 
@@ -65,10 +65,10 @@ exports.getQuestionById = async (req, res) => {
     const { id } = req.params;
     try {
         const question = await Question.findById(id);
-        if (!question) return res.status(404).json({ error: 'Question not found' });
-        res.status(200).json(question);
+        if (!question) return res.status(404).json({ status: "error", message: 'Question not found' });
+        return res.status(200).json({status: "success", question});
     } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve question' });
+        return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
 };
 
@@ -78,7 +78,7 @@ exports.updateQuestion = async (req, res) => {
 
     try {
         const question = await Question.findById(id);
-        if (!question) return res.status(404).json({ error: 'Question not found' });
+        if (!question) return res.status(404).json({ status: "error", message: 'Question not found' });
 
         let updateFields = {};
 
@@ -91,13 +91,13 @@ exports.updateQuestion = async (req, res) => {
         const updatedQuestion = await Question.findByIdAndUpdate(id, updateFields, { new: true });
 
         if (!updatedQuestion) {
-            return res.status(404).json({ error: 'Failed to update the question.' });
+            return res.status(404).json({ status: "error", message: 'Failed to update the question.' });
         }
 
-        res.status(200).json({ message: 'Question updated successfully', updatedQuestion });
+        return res.status(200).json({ status: "success", message: 'Question updated successfully', updatedQuestion });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to update question' });
+        return res.status(500).json({ status: "error", message: 'Something went wrong. Please try again later.' });
     }
 };
 
@@ -105,9 +105,9 @@ exports.deleteQuestion = async (req, res) => {
     const { id } = req.params;
     try {
         const deletedQuestion = await Question.findByIdAndDelete(id);
-        if (!deletedQuestion) return res.status(404).json({ error: 'Question not found' });
-        res.status(200).json({ message: 'Question deleted successfully' });
+        if (!deletedQuestion) return res.status(404).json({ status: "error", message: 'Question not found' });
+        res.status(200).json({ status: "success", message: 'Question deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete question' });
+        res.status(500).json({ status: "error", message: 'Something went wrong. Please try again later.' });
     }
 };
