@@ -27,7 +27,7 @@ exports.startExam = async (req, res) => {
 
 exports.submitExam = async (req, res) => {
     const { examId, answers } = req.body;
-    const studentId = req.user.id;
+    const studentId = req.userId;
 
     try {
         const exam = await Exam.findById(examId).populate('questions');
