@@ -32,13 +32,21 @@ exports.submitExam = async (req, res) => {
     try {
         const exam = await Exam.findById(examId).populate('questions');
         if (!exam) return res.status(404).json({ error: "Exam not found" });
-
+        
         let score = 0;
         exam.questions.forEach(question => {
             const correctAnswer = question.options.find(option => option.isCorrect);
+        
             const selectedAnswer = answers.find(answer => answer.questionId === question._id.toString());
-            if (selectedAnswer && selectedAnswer.selectedOption === correctAnswer.text) {
-                score++;
+        
+            if (selectedAnswer) {
+                const selectedOptionText = question.options.find(
+                    option => option._id.toString() === selectedAnswer.selectedOption
+                )?.text;
+                        
+                if (selectedOptionText === correctAnswer.text) {
+                    score++;
+                }
             }
         });
 
