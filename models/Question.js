@@ -13,13 +13,20 @@ const questionSchema = new mongoose.Schema({
     ],
     type: {
         type: String,
-        enum: ['multiple-choice', 'true-false'],
+        enum: ['multi-correct', 'single-correct'],
         required: true,
     },
     category: {
         type: String,
         required: true,
     },
+    image: {
+        type: String
+    },
 });
+
+questionSchema.path('options').validate(function (options) {
+    return options.length <= 4;
+}, 'A question can have a maximum of 4 options.');
 
 module.exports = mongoose.model('Question', questionSchema);
