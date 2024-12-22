@@ -30,6 +30,11 @@ exports.submitExam = async (req, res) => {
     const studentId = req.userId;
 
     try {
+        const alreadySubmitted = await Result.findOne({examId, studentId});
+        if(alreadySubmitted){
+            return res.status(409).json({message: "You have already submitted exam"});
+        }
+
         const exam = await Exam.findById(examId).populate('questions');
         if (!exam) return res.status(404).json({ error: "Exam not found" });
         
