@@ -26,8 +26,4 @@ app.use('/api/exams', examRoutes);
 app.use('/api/exam-taking', examTakingRoutes);
 app.use('/api/results', resultRouter);
 
-app.get('/', (req,res)=>{
-    return res.status(201).json({msg: "Hello from server"});
-});
-
 module.exports = app;
