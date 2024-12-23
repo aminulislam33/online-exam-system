@@ -20,6 +20,12 @@ const questionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    difficultyLevel: {
+        type: String,
+        enum: ["easy", "moderate", "tough"],
+        required: true,
+        default: 'moderate'
+    },
     image: {
         type: String
     },

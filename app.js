@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const examRoutes = require('./routes/examRoutes');
 const examTakingRoutes = require('./routes/examTakingRoutes');
+const resultRouter = require('./routes/resultRoutes');
 const { verifyToken } = require('./middlewares/authMiddleware');
 const requestLogger = require('./middlewares/requestLogger');
 
@@ -23,6 +24,7 @@ app.use(verifyToken);
 app.use('/api/questions', questionRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/exam-taking', examTakingRoutes);
+app.use('/api/results', resultRouter);
 
 app.get('/', (req,res)=>{
     return res.status(201).json({msg: "Hello from server"});

@@ -6,22 +6,22 @@ exports.startExam = async (req, res) => {
 
     try {
         const exam = await Exam.findById(examId).populate('questions');
-        if (!exam) return res.status(404).json({ error: "Exam not found" });
+        if (!exam) return res.status(404).json({ status: "error", message: "Exam not found" });
 
         const currentTime = new Date();
 
         if (currentTime < exam.startTime) {
-            return res.status(403).json({ error: "The exam has not started yet." });
+            return res.status(403).json({ status: "error", message: "The exam has not started yet." });
         }
 
         if (currentTime > exam.endTime) {
-            return res.status(403).json({ error: "The exam has already ended." });
+            return res.status(403).json({ status: "error", message: "The exam has already ended." });
         }
 
 
-        res.status(200).json({ exam });
+        return res.status(200).json({ status: "success", data: {exam} });
     } catch (error) {
-        res.status(500).json({ error: "Failed to start exam" });
+        return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
 };
 
@@ -32,11 +32,11 @@ exports.submitExam = async (req, res) => {
     try {
         const alreadySubmitted = await Result.findOne({examId, studentId});
         if(alreadySubmitted){
-            return res.status(409).json({message: "You have already submitted exam"});
+            return res.status(409).json({status: "error", message: "You have already submitted exam"});
         }
 
         const exam = await Exam.findById(examId).populate('questions');
-        if (!exam) return res.status(404).json({ error: "Exam not found" });
+        if (!exam) return res.status(404).json({ status: "error", message: "Exam not found" });
         
         let score = 0;
         exam.questions.forEach(question => {
@@ -67,8 +67,8 @@ exports.submitExam = async (req, res) => {
 
         await result.save();
 
-        res.status(200).json({ message: "Exam submitted successfully", score });
+        return res.status(200).json({ status: "success", message: "Exam submitted successfully", data: {score} });
     } catch (error) {
-        res.status(500).json({ error: "Failed to submit exam" });
+        return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
 };

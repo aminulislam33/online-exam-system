@@ -1,6 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 const { text } = require('express');
 const Question = require('../models/Question');
+const logger = require('../utils/logger');
 
 cloudinary.config({
     cloud_name: "",
@@ -9,14 +10,18 @@ cloudinary.config({
 });
 
 exports.createQuestion = async (req, res) => {
-    const { text, options, type, category } = req.body;
+    const { text, options, type, category, difficultyLevel } = req.body;
     const imageFile = req.file;
 
-    if (!text || !options || !type || !category) {
+    if (!text || !options || !type || !category || !difficultyLevel) {
         return res.status(400).json({ status: "error", message: "Please provide all required fields." });
     }
 
     try {
+        if (options.length > 4) {
+            return res.status(400).json({ status: "error", message: "Options should not exceed 4 choices." });
+        }
+        
         const correctOption = options.find(option => option.isCorrect === true);
         if (!correctOption) {
             return res.status(400).json({ status: "error", message: 'Correct answer must be one of the options.' });
@@ -37,6 +42,7 @@ exports.createQuestion = async (req, res) => {
             options,
             type,
             category,
+            difficultyLevel,
             image: imageUrl
         });
 
@@ -44,18 +50,43 @@ exports.createQuestion = async (req, res) => {
         return res.status(201).json({ status: "sucess", message: "Question created successfully", question });
     } catch (error) {
         if (error.name === "ValidationError") {
-            const errorMessages = Object.values(error.errors).map(err => err.message);
-            return res.status(400).json({ status: "error" ,message: errorMessages.join(", ") });
-        }
-        console.error("Error creating question:", error);
+            console.error("Validation Error:", error);
+            return res.status(400).json({ status: "error", message: "Invalid input. Please check your data." });
+        }        
+        logger.error("Error creating question:", error);
         return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
 };
 
 exports.getAllQuestions = async (req, res) => {
     try {
-        const questions = await Question.find();
-        return res.status(200).json({status: "success", questions});
+        const { difficultyLevel, type, category, keyword } = req.query;
+
+        const filter = {};
+
+        if (difficultyLevel && ['easy', 'moderate', 'tough'].includes(difficultyLevel)) {
+            filter.difficultyLevel = difficultyLevel;
+        }
+
+        if (type) {
+            filter.type = type;
+        }
+
+        if (category) {
+            filter.category = category;
+        }
+
+        if (keyword) {
+            filter.text = { $regex: keyword, $options: 'i' };
+        }
+
+        const questions = await Question.find(filter);
+
+        if (questions.length === 0) {
+            return res.status(404).json({ status: "error", message: "No questions found matching the criteria." });
+        }
+
+        return res.status(200).json({ status: "success", data: questions });
     } catch (error) {
         return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
@@ -66,7 +97,7 @@ exports.getQuestionById = async (req, res) => {
     try {
         const question = await Question.findById(id);
         if (!question) return res.status(404).json({ status: "error", message: 'Question not found' });
-        return res.status(200).json({status: "success", question});
+        return res.status(200).json({status: "success", data: {question}});
     } catch (error) {
         return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
@@ -74,18 +105,20 @@ exports.getQuestionById = async (req, res) => {
 
 exports.updateQuestion = async (req, res) => {
     const { id } = req.params;
-    const { questionText, type, category } = req.body;
+    const { questionText, type, category, difficultyLevel } = req.body;
+    if (difficultyLevel && !['easy', 'moderate', 'tough'].includes(difficultyLevel)) {
+        return res.status(400).json({ status: "error", message: 'Invalid difficulty level. Use "easy", "moderate", or "tough".' });
+    }
 
     try {
         const question = await Question.findById(id);
         if (!question) return res.status(404).json({ status: "error", message: 'Question not found' });
 
-        let updateFields = {};
-
-        updateFields = {
+        const updateFields = {
             ...(text && {text: questionText}),
             ...(type && {type}),
             ...(category && {category}),
+            ...(difficultyLevel && {difficultyLevel}),
         };
 
         const updatedQuestion = await Question.findByIdAndUpdate(id, updateFields, { new: true });
