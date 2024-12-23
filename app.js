@@ -24,12 +24,12 @@ app.use(requestLogger);
 app.use(limiter);
 
 app.use('/api/auth', authRoutes);
+app.use('/api/verify-email', verifyEmailRouter);
 app.use(verifyToken);
 app.use('/api/questions', questionRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/exam-taking', examTakingRoutes);
 app.use('/api/results', resultRouter);
 app.use('/api/profile', profileRouter);
-app.use('/api/verify-email', verifyEmailRouter);
 
 module.exports = app;

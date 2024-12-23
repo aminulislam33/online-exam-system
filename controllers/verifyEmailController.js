@@ -3,7 +3,7 @@ const User = require("../models/User");
 const generateOTP = require("../utils/otpGenerator");
 
 exports.sendOTP = async (req, res) => {
-    const email = req.email;
+    const {email} = req.body;
     try {
         const user = await User.findOne({email});
         if (!user) {
@@ -39,8 +39,7 @@ exports.sendOTP = async (req, res) => {
 };
 
 exports.verifyOTP = async (req, res) => {
-    const { otp } = req.body;
-    const email = req.email;
+    const { email, otp } = req.body;
 
     try {
         const user = await User.findOne({email});
