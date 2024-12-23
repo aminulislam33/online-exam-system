@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
-const { sendOTP } = require('./verifyEmail');
+const { sendOTP } = require('./verifyEmailController');
 
 exports.signup = async (req, res) => {
     const { name, email, department, enrollmentNumber, semester, year, password } = req.body;

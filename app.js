@@ -8,6 +8,7 @@ const examRoutes = require('./routes/examRoutes');
 const examTakingRoutes = require('./routes/examTakingRoutes');
 const resultRouter = require('./routes/resultRoutes');
 const profileRouter = require('./routes/profileRoutes');
+const verifyEmailRouter = require('./routes/verifyEmailRoutes');
 const { verifyToken } = require('./middlewares/authMiddleware');
 const requestLogger = require('./middlewares/requestLogger');
 
@@ -27,5 +28,6 @@ app.use('/api/exams', examRoutes);
 app.use('/api/exam-taking', examTakingRoutes);
 app.use('/api/results', resultRouter);
 app.use('/api/profile', profileRouter);
+app.use('/api/verify-email', verifyEmailRouter);
 
 module.exports = app;

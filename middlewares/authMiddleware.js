@@ -8,6 +8,7 @@ exports.verifyToken = (req, res, next) => {
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) return res.status(401).json({ error: 'Unauthorized' });
+        req.email = decoded.email,
         req.userId = decoded.id;
         req.userRole = decoded.role;
         next();
