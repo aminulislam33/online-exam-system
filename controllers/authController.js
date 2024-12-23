@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { sendOTP } = require('./verifyEmail');
 
 exports.signup = async (req, res) => {
     const { name, email, department, enrollmentNumber, semester, year, password } = req.body;
@@ -11,7 +12,7 @@ exports.signup = async (req, res) => {
     try {
         const existUser = await User.findOne({email});
         if(existUser){
-            return res.status(409).json({status: "error", message: "Unable to register user"});
+            return res.status(409).json({status: "error", message: "Email is already exist"});
         }
         const newUser = new User({
             name,
@@ -42,7 +43,7 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ status: "error", message: 'Invalid email or password' });
 
-        const payload = { id: user._id, role: user.role };
+        const payload = { email: user.email, id: user._id, role: user.role };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
         return res.status(200).json({ status: "success", message: 'Login successful', token });
     } catch (error) {
