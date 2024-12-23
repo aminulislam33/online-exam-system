@@ -11,6 +11,7 @@ const profileRouter = require('./routes/profileRoutes');
 const verifyEmailRouter = require('./routes/verifyEmailRoutes');
 const { verifyToken } = require('./middlewares/authMiddleware');
 const requestLogger = require('./middlewares/requestLogger');
+const limiter = require('./utils/limiter');
 
 const app = express();
 
@@ -20,6 +21,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
+app.use(limiter);
 
 app.use('/api/auth', authRoutes);
 app.use(verifyToken);

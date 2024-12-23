@@ -2,14 +2,7 @@ const Exam = require('../models/Exam');
 const Question = require('../models/Question');
 
 exports.createExam = async (req, res) => {
-    const { title, description, questions, duration, startTime, endTime } = req.body;
-    if (!title || !questions || !startTime || !endTime || !duration) {
-        return res.status(400).json({ status: "error", message: "All required fields must be provided" });
-    }
-    
-    if (!Array.isArray(questions) || questions.length === 0) {
-        return res.status(400).json({ status: "error", message: "At least one question must be provided" });
-    }    
+    const { title, description, questions, duration, startTime, endTime } = req.body; 
 
     try {
         const newExam = new Exam({
@@ -17,8 +10,8 @@ exports.createExam = async (req, res) => {
             description,
             questions,
             duration,
-            startTime,
-            endTime,
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
             createdBy: req.userId,
         });
         await newExam.save();
@@ -30,13 +23,39 @@ exports.createExam = async (req, res) => {
 };
 
 exports.getExams = async (req, res) => {
+    const { page = 1, limit = 10, title, startTime, endTime } = req.query;
+
     try {
-        const exams = await Exam.find().populate('questions');
-        if(exams.length === 0){
-            return res.status(404).json({status: "error", message: "Exams not found"});
+        const query = {};
+        if (title) query.title = { $regex: title, $options: 'i' };
+        if (startTime) query.startTime = { $gte: new Date(startTime) };
+        if (endTime) query.endTime = { ...query.endTime, $lte: new Date(endTime) };
+
+        const skip = (page - 1) * limit;
+        const exams = await Exam.find(query)
+            .populate('questions')
+            .skip(skip)
+            .limit(limit);
+
+        if (exams.length === 0) {
+            return res.status(404).json({ status: "error", message: "Exams not found" });
         }
-        return res.json({status: "success", data: {exams}});
+
+        const totalExams = await Exam.countDocuments(query);
+
+        return res.status(200).json({
+            status: "success",
+            data: {
+                exams,
+                pagination: {
+                    totalExams,
+                    currentPage: page,
+                    totalPages: Math.ceil(totalExams / limit),
+                },
+            },
+        });
     } catch (error) {
+        console.error(error);
         return res.status(500).json({ status: "error", message: 'Something went wrong. Please try again later.' });
     }
 };
@@ -58,10 +77,27 @@ exports.updateExam = async (req, res) => {
     const { title, description, questions, duration, startTime, endTime } = req.body;
 
     try {
-        const exam = await Exam.findByIdAndUpdate(id, { title, description, questions, duration, startTime, endTime }, { new: true });
-        if (!exam) return res.status(404).json({ status: "error", message: "Exam not found" });
-        return res.status(200).json({ status: "success", message: "Exam updated successfully" });
+        const updateFields = {
+            ...(title && { title }),
+            ...(description && { description }),
+            ...(questions && { questions }),
+            ...(duration && { duration }),
+            ...(startTime && { startTime }),
+            ...(endTime && { endTime }),
+        };
+
+        const exam = await Exam.findByIdAndUpdate(id, updateFields, { new: true });
+        if (!exam) {
+            return res.status(404).json({ status: "error", message: "Exam not found" });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            message: "Exam updated successfully",
+            data: { exam },
+        });
     } catch (error) {
+        console.error(error);
         return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
 };

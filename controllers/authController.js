@@ -1,40 +1,36 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 const User = require('../models/User');
-const { sendOTP } = require('./verifyEmailController');
 
 exports.signup = async (req, res) => {
-    const { name, email, department, enrollmentNumber, semester, year, password } = req.body;
-    if ( !name || !email || !password || !department || !enrollmentNumber || !semester || !year ) {
-        return res.status(400).json({ status: "error", message: "Please provide all required fields." });
-    }
+    const { name, email, password, department, enrollmentNumber, semester, year } = req.body;
 
     try {
-        const existUser = await User.findOne({email});
-        if(existUser){
-            return res.status(409).json({status: "error", message: "Email is already exist"});
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ status: 'error', message: 'Email already exists' });
         }
+
         const newUser = new User({
             name,
             email,
+            password,
             department,
             enrollmentNumber,
             semester,
             year,
-            password
         });
+
         await newUser.save();
-        res.status(201).json({ status: "success", message: 'User registered successfully' });
+        return res.status(201).json({ status: 'success', message: 'User registered successfully' });
     } catch (error) {
-        res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
+        return res.status(500).json({ status: 'error', message: 'Server error' });
     }
 };
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ status: "error", message: "Please provide all required fields." });
-    }
 
     try {
         const user = await User.findOne({ email });
