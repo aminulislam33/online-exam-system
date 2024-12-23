@@ -7,6 +7,7 @@ const questionRoutes = require('./routes/questionRoutes');
 const examRoutes = require('./routes/examRoutes');
 const examTakingRoutes = require('./routes/examTakingRoutes');
 const resultRouter = require('./routes/resultRoutes');
+const profileRouter = require('./routes/profileRoutes');
 const { verifyToken } = require('./middlewares/authMiddleware');
 const requestLogger = require('./middlewares/requestLogger');
 
@@ -25,5 +26,6 @@ app.use('/api/questions', questionRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/exam-taking', examTakingRoutes);
 app.use('/api/results', resultRouter);
+app.use('/api/profile', profileRouter);
 
 module.exports = app;
