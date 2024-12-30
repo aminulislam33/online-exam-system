@@ -9,6 +9,7 @@ const getResult = async (req,res)=>{
         if(!result || result.length === 0){
             return res.status(404).json({status: "error", message: "No result found"});
         }
+        console.log("Hello")
         return res.status(200).json({status: "success", data: result});
     } catch (error) {
         handleError(res, error);

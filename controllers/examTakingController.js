@@ -2,13 +2,13 @@ const Exam = require('../models/Exam');
 const Result = require('../models/Result');
 
 exports.startExam = async (req, res) => {
-    const { examId } = req.body;
+    const {examId} = req.params;
 
     try {
-        const exam = await Exam.findById(examId).populate('questions');
+        const exam = await Exam.findById(examId).populate('questions');        
         if (!exam) return res.status(404).json({ status: "error", message: "Exam not found" });
 
-        const currentTime = new Date();
+        const currentTime = new Date(); 
 
         if (currentTime < exam.startTime) {
             return res.status(403).json({ status: "error", message: "The exam has not started yet." });
@@ -18,10 +18,10 @@ exports.startExam = async (req, res) => {
             return res.status(403).json({ status: "error", message: "The exam has already ended." });
         }
 
-
         return res.status(200).json({ status: "success", data: {exam} });
     } catch (error) {
-        return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
+        console.error(error)
+        return res.status(500).json({ status: "error", message: "kya lauda panti chal rha hai Something went wrong. Please try again later." });
     }
 };
 
@@ -67,7 +67,7 @@ exports.submitExam = async (req, res) => {
 
         await result.save();
 
-        return res.status(200).json({ status: "success", message: "Exam submitted successfully", data: {score} });
+        return res.status(200).json({ status: "success", message: "Exam submitted successfully" });
     } catch (error) {
         return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }

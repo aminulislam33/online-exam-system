@@ -5,6 +5,7 @@ const User = require('../models/User');
 
 exports.signup = async (req, res) => {
     const { name, email, password, department, enrollmentNumber, semester, year } = req.body;
+    console.log(name, email, password, department, enrollmentNumber, semester, year)
 
     try {
         const existingUser = await User.findOne({ email });
@@ -40,7 +41,7 @@ exports.login = async (req, res) => {
         if (!isMatch) return res.status(400).json({ status: "error", message: 'Invalid email or password' });
 
         const payload = { email: user.email, id: user._id, role: user.role };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
         return res.status(200).json({ status: "success", message: 'Login successful', token });
     } catch (error) {
         res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });

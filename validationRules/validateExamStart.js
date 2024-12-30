@@ -1,10 +1,7 @@
-const { check } = require('express-validator');
+const { param } = require('express-validator');
 
 exports.startExamValidationRules = [
-    check('examId')
-        .trim()
-        .notEmpty()
-        .withMessage('Exam ID is required')
+    param('examId')
         .isMongoId()
-        .withMessage('Invalid Exam ID format'),
+        .withMessage('Invalid exam ID'),
 ];

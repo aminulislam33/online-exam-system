@@ -6,10 +6,6 @@ exports.createQuestion = async (req, res) => {
     const { text, options, type, category, difficultyLevel } = req.body;
     const imageFile = req.file;
 
-    if (!text || !options || !type || !category || !difficultyLevel) {
-        return res.status(400).json({ status: "error", message: "Please provide all required fields." });
-    }
-
     try {
         if (options.length > 4) {
             return res.status(400).json({ status: "error", message: "Options should not exceed 4 choices." });
