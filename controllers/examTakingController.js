@@ -8,7 +8,7 @@ exports.startExam = async (req, res) => {
         const exam = await Exam.findById(examId).populate('questions');        
         if (!exam) return res.status(404).json({ status: "error", message: "Exam not found" });
 
-        const currentTime = new Date(); 
+        const currentTime = new Date();
 
         if (currentTime < exam.startTime) {
             return res.status(403).json({ status: "error", message: "The exam has not started yet." });

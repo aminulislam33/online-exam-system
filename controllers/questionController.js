@@ -3,7 +3,8 @@ const Question = require('../models/Question');
 const logger = require('../utils/logger');
 
 exports.createQuestion = async (req, res) => {
-    const { text, options, type, category, difficultyLevel } = req.body;
+    const { text, type, category, difficultyLevel } = req.body;
+    const options = JSON.parse(req.body.options);
     const imageFile = req.file;
 
     try {
@@ -86,7 +87,7 @@ exports.getQuestionById = async (req, res) => {
     try {
         const question = await Question.findById(id);
         if (!question) return res.status(404).json({ status: "error", message: 'Question not found' });
-        return res.status(200).json({status: "success", data: {question}});
+        return res.status(200).json({status: "success", data: question});
     } catch (error) {
         return res.status(500).json({ status: "error", message: "Something went wrong. Please try again later." });
     }
@@ -95,6 +96,7 @@ exports.getQuestionById = async (req, res) => {
 exports.updateQuestion = async (req, res) => {
     const { id } = req.params;
     const { questionText, type, category, difficultyLevel } = req.body;
+    console.log(questionText, type, category, difficultyLevel)
     if (difficultyLevel && !['easy', 'moderate', 'tough'].includes(difficultyLevel)) {
         return res.status(400).json({ status: "error", message: 'Invalid difficulty level. Use "easy", "moderate", or "tough".' });
     }
@@ -104,7 +106,7 @@ exports.updateQuestion = async (req, res) => {
         if (!question) return res.status(404).json({ status: "error", message: 'Question not found' });
 
         const updateFields = {
-            ...(text && {text: questionText}),
+            ...(questionText && {text: questionText}),
             ...(type && {type}),
             ...(category && {category}),
             ...(difficultyLevel && {difficultyLevel}),

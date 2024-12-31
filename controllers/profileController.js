@@ -4,13 +4,28 @@ const { handleError } = require('../utils/handleError');
 const cloudinary = require('../config/cloudinary');
 
 const fetchProfile = async (req,res)=>{
+    const {email, id} =  req.body;
     try {
-        const user = await User.findById(req.userId).select("-password");
-        if(!user){
-            return res.status(404).json({status: "error", message: "User not found"});
+        if(id){
+            const userById = await User.findById(id).select("-password");
+            if(!userById){
+                return res.status(404).json({status: "error", message: "User not found by Id"});
+            }
+            return res.status(200).json({status: "success", data: userById});
+        } else if(email){
+            const userByEmail = await User.findOne({email}).select("-password");
+            if(!userByEmail){
+                return res.status(404).json({status: "error", message: "User not found by email"});
+            }
+            return res.status(200).json({status: "success", data: userByEmail});
+        } else {
+            const userByToken = await User.findById(req.userId).select("-password");
+            if(!userByToken){
+                return res.status(404).json({status: "error", message: "User not found by token"});
+            }
+            return res.status(200).json({status: "success", data: userByToken});
         }
 
-        return res.status(200).json({status: "success", data: user});
     } catch (error) {
         handleError(res, error);
     }

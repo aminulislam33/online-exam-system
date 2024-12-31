@@ -9,7 +9,7 @@ const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
 router.use(isAdmin);
-router.post('/create', upload.single('image'), createQuestionValidator, validate, createQuestion);
+router.post('/create', upload.single('image'), validate, createQuestion);
 router.get('/', getAllQuestionsValidator, validate, getAllQuestions);
 router.get('/:id', getQuestionByIdValidator, validate, getQuestionById);
 router.put('/:id', updateQuestionValidator, validate, updateQuestion);

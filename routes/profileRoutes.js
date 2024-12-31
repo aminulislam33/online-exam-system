@@ -5,7 +5,7 @@ const { changePasswordValidationRules } = require('../validationRules/validateCh
 const validate = require('../middlewares/validate');
 const router = express.Router();
 
-router.get('/', fetchProfile);
+router.post('/', fetchProfile);
 router.put('/update', updateProfileValidationRules, validate, updateProfile);
 router.put('/change-password', changePasswordValidationRules, validate , changePassword);
 router.post('/upload-picture', uploadPicture);
