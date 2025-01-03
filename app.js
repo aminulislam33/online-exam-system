@@ -19,12 +19,24 @@ const app = express();
 dotenv.config();
 connectDB();
 
-const corsOptions = {
-    origin: process.env.CORS_ORIGIN,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-};
-app.use(cors(corsOptions));
+const cors = require('cors');
+
+const allowedOrigins = [
+  'https://online-exam-system-frontend.vercel.app',
+  'http://localhost:3000',
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(requestLogger);
 app.use(limiter);
