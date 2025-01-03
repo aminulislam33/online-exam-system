@@ -19,8 +19,6 @@ const app = express();
 dotenv.config();
 connectDB();
 
-const cors = require('cors');
-
 const allowedOrigins = [
   'https://online-exam-system-frontend.vercel.app',
   'http://localhost:3000',
