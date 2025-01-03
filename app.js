@@ -20,6 +20,7 @@ dotenv.config();
 connectDB();
 
 const allowedOrigins = [
+  'https:apticrack.aminuldev.me',
   'https://online-exam-system-frontend.vercel.app',
   'http://localhost:3000',
 ];
